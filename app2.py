@@ -506,11 +506,20 @@ with col_chart2:
     # Risk score distribution
     if st.session_state.transactions:
         df = pd.DataFrame(st.session_state.transactions)
-        fig_hist = px.histogram(df, x='risk_score', bins=10, 
-                               title="Risk Score Distribution",
-                               color='status',
-                               color_discrete_map={'Legitimate': 'green', 'Flagged as Fraudulent': 'red'})
-        st.plotly_chart(fig_hist, use_container_width=True)
+        try:
+            fig_hist = px.histogram(df, x='risk_score', nbins=10, 
+                                   title="Risk Score Distribution",
+                                   color='status',
+                                   color_discrete_map={'Legitimate': 'green', 'Flagged as Fraudulent': 'red'})
+            st.plotly_chart(fig_hist, use_container_width=True)
+        except Exception as e:
+            # Fallback to simple bar chart if histogram fails
+            risk_counts = df['status'].value_counts()
+            fig_bar = px.bar(x=risk_counts.index, y=risk_counts.values,
+                           title="Transaction Status Distribution",
+                           color=risk_counts.index,
+                           color_discrete_map={'Legitimate': 'green', 'Flagged as Fraudulent': 'red'})
+            st.plotly_chart(fig_bar, use_container_width=True)
 
 # Enhanced Audit Log
 st.markdown("### 📋 Advanced Transaction Audit Log")
